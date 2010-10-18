@@ -71,13 +71,13 @@ class FormMails extends Frontend
 				}
 			}
 			
-			if ($arrForm['cmailBCC'] != '')
+			if ($arrForm['cmailBcc'] != '')
 			{
-				$arrBCC = trimsplit(',', $arrForm['cmailBCC']);
+				$arrBCC = trimsplit(',', $arrForm['cmailBcc']);
 				
 				foreach( $arrBCC as $strRecipient )
 				{
-					$objEmail->sendBcc($strRecipient);
+					$objEmail->sendTo($strRecipient);
 				}
 				
 				$blnSent = true;

@@ -55,10 +55,10 @@ $GLOBALS['TL_DCA']['tl_form_mails'] = array
 		'sorting' => array
 		(
 			'mode'						=> 4,
-			'fields'					=> array('tstamp'),
+			'fields'					=> array('tstamp DESC'),
 			'flag'						=> 8,
 			'panelLayout'				=> 'filter,limit',
-			'headerFields'				=> array('id','title'),
+			'headerFields'				=> array('id', 'title'),
 			'child_record_callback'		=> array('tl_form_mails', 'listRows')
 		),
 		'global_operations' => array
@@ -211,7 +211,7 @@ class tl_form_mails extends Backend
 				$intForm = $this->Input->get('id');
 				$imported = 0;
 				
-				$objParser = new parseCsv();
+				$objParser = new parseCSV();
 				$objParser->auto(TL_ROOT . '/' . $strFile);
 				
 				foreach( $objParser->data as $arrRow )
