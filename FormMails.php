@@ -36,10 +36,12 @@ class FormMails extends Frontend
 		if ($arrForm['cmail'])
 		{
 			$blnSent = false;
+			
+			$arrData = $this->preparePostData($arrPost);
 
 			$objEmail = new Email();
-			$objEmail->subject = $arrForm['cmailSubject'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailSubject']), $arrPost);
-			$objEmail->text = $arrForm['cmailMessage'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailMessage']), $arrPost);
+			$objEmail->subject = $arrForm['cmailSubject'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailSubject']), $arrData);
+			$objEmail->text = $arrForm['cmailMessage'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailMessage']), $arrData);
 			
 			if ($arrForm['cmailSender'] == '')
 			{
@@ -63,9 +65,9 @@ class FormMails extends Frontend
 			{
 				$objField = $this->Database->execute("SELECT * FROM tl_form_field WHERE id={$arrForm['cmailRecipient']}");
 				
-				if ($objField->numRows && $this->isValidEmailAddress($arrPost[$objField->name]))
+				if ($objField->numRows && $this->isValidEmailAddress($arrData[$objField->name]))
 				{
-					$arrForm['cmailRecipient'] = $arrPost[$objField->name];
+					$arrForm['cmailRecipient'] = $arrData[$objField->name];
 					$objEmail->sendTo($arrForm['cmailRecipient']);
 					$blnSent = true;
 				}
@@ -90,6 +92,25 @@ class FormMails extends Frontend
 							   ->execute($arrForm['id'], time(), $arrForm['cmailSender'], $arrForm['cmailSubject'], $arrForm['cmailRecipient'], $arrForm['cmailBcc'], nl2br($arrForm['cmailMessage']), serialize($arrPost), serialize($arrFiles));
 			}
 		}
+	}
+	
+	
+	private function preparePostData($arrData, $blnImplode=false)
+	{
+		foreach( $arrData as $k => $v )
+		{
+			if (is_array($v))
+			{
+				$arrData[$k] = $this->preparePostData($v, true);
+			}
+		}
+		
+		if ($blnImplode)
+		{
+			return implode(', ', $arrData);
+		}
+		
+		return $arrData;
 	}
 }
 
