@@ -63,13 +63,13 @@ $GLOBALS['TL_DCA']['tl_form_mails'] = array
 		),
 		'global_operations' => array
 		(
-			'export' => array
-			(
-				'label'					=> &$GLOBALS['TL_LANG']['tl_form_mails']['export'],
-				'href'					=> 'key=export_mails',
-				'class'					=> 'header_export_mails',
-				'attributes'			=> 'onclick="Backend.getScrollOffset();"'
-			),
+//			'export' => array
+//			(
+//				'label'					=> &$GLOBALS['TL_LANG']['tl_form_mails']['export'],
+//				'href'					=> 'key=export_mails',
+//				'class'					=> 'header_export_mails',
+//				'attributes'			=> 'onclick="Backend.getScrollOffset();"'
+//			),
 			'all' => array
 			(
 				'label'					=> &$GLOBALS['TL_LANG']['MSC']['all'],
