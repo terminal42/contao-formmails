@@ -55,6 +55,7 @@ class FormMails extends Frontend
 			}
 			else
 			{
+				$arrForm['cmailSender'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailSender']), $arrData);
 				list($strName, $strAddress) = $this->splitFriendlyName($arrForm['cmailSender']);
 				
 				$objEmail->from = $strAddress;

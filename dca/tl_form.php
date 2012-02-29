@@ -84,7 +84,7 @@ $GLOBALS['TL_DCA']['tl_form']['fields']['cmailSender'] = array
 (
 	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailSender'],
 	'inputType'				=> 'text',
-	'eval'					=> array('maxlength'=>255, 'rgxp'=>'email', 'tl_class'=>'w50'),
+	'eval'					=> array('maxlength'=>255, 'tl_class'=>'w50'),
 );
 
 $GLOBALS['TL_DCA']['tl_form']['fields']['cmailSubject'] = array
