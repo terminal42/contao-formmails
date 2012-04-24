@@ -77,14 +77,14 @@ $GLOBALS['TL_DCA']['tl_form']['fields']['cmailBcc'] = array
 	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailBcc'],
 	'inputType'				=> 'text',
 	'default'				=> $GLOBALS['TL_ADMIN_EMAIL'],
-	'eval'					=> array('maxlength'=>255, 'rgxp'=>'extnd', 'tl_class'=>'w50'),
+	'eval'					=> array('maxlength'=>255, 'rgxp'=>'extnd', 'decodeEntities'=>true, 'tl_class'=>'w50'),
 );
 
 $GLOBALS['TL_DCA']['tl_form']['fields']['cmailSender'] = array
 (
 	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailSender'],
 	'inputType'				=> 'text',
-	'eval'					=> array('maxlength'=>255, 'tl_class'=>'w50'),
+	'eval'					=> array('maxlength'=>255, 'decodeEntities'=>true, 'tl_class'=>'w50'),
 );
 
 $GLOBALS['TL_DCA']['tl_form']['fields']['cmailSubject'] = array
