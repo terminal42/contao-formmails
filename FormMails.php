@@ -35,19 +35,8 @@ class FormMails extends Frontend
 	{
 		if ($arrForm['cmail'] && $arrForm['cmailTemplate'])
 		{
-			$objField = $this->Database->prepare("SELECT name FROM tl_form_field WHERE id=?")
-									   ->limit(1)
-									   ->execute($arrForm['cmailRecipient']);
-
-			// Return if field can not be found or the e-mail is invalid
-			if (!$objField->numRows || !$this->isValidEmailAddress($arrPost[$objField->name]))
-			{
-				return;
-			}
-
-			$objTemplate = $this->Database->prepare("SELECT * FROM tl_mail_templates WHERE id=?")
-										  ->limit(1)
-										  ->execute($arrForm['cmailTemplate']);
+			$objField = $this->Database->prepare("SELECT name FROM tl_form_field WHERE id=?")->limit(1)->execute($arrForm['cmailRecipient']);
+			$objTemplate = $this->Database->prepare("SELECT * FROM tl_mail_templates WHERE id=?")->limit(1)->execute($arrForm['cmailTemplate']);
 
 			// Return if the template was not found
 			if (!$objTemplate->numRows)
@@ -55,9 +44,30 @@ class FormMails extends Frontend
 				return;
 			}
 
+			$blnSent = false;
+			$arrData = $this->preparePostData($arrPost);
 			$objEmail = new EmailTemplate($objTemplate->id);
 
-			if ($objEmail->send($arrPost[$objField->name], $this->preparePostData($arrPost)))
+			// Send an e-mail to recipient
+			if ($objField->numRows && $this->isValidEmailAddress($arrPost[$objField->name]))
+			{
+				$blnSent = $objEmail->send($arrPost[$objField->name], $arrData);
+			}
+			// Send blind carbon copies, if any
+			elseif ($objTemplate->recipient_bcc != '')
+			{
+				$recipients = trimsplit(',', $objTemplate->recipient_bcc);
+
+				foreach ($recipients as $email)
+				{
+					if ($this->isValidEmailAddress($email))
+					{
+						$blnSent = $objEmail->send($email, $arrData);
+					}
+				}
+			}
+
+			if ($blnSent)
 			{
 				$this->Database->prepare("INSERT INTO tl_form_mails (pid,tstamp,cmailSender,cmailSubject,cmailRecipient,cmailBcc,cmailMessage,form_post,form_files) VALUES (?,?,?,?,?,?,?,?,?)")
 							   ->execute($arrForm['id'], time(), $objTemplate->sender_address, $objEmail->subject, $arrForm['cmailRecipient'], ($objTemplate->recipient_bcc ? $objTemplate->recipient_bcc : ''), nl2br($objEmail->text), serialize($arrPost), serialize($arrFiles));
