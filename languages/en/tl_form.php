@@ -33,10 +33,7 @@
  */
 $GLOBALS['TL_LANG']['tl_form']['cmail']				= array('Send mail to customer', 'Check here to send an email to the customer.');
 $GLOBALS['TL_LANG']['tl_form']['cmailRecipient']	= array('Recipient', 'Please select the field containing the recipient address.');
-$GLOBALS['TL_LANG']['tl_form']['cmailBcc']			= array('Blind Copy', 'Send a blind copy of this mail to the given email addresses (comma separated).');
-$GLOBALS['TL_LANG']['tl_form']['cmailSender']		= array('Sender', 'Please enter a sender address. If you leave this blank, the system admin address will be used.');
-$GLOBALS['TL_LANG']['tl_form']['cmailSubject']		= array('Subject', 'Please enter a subject.');
-$GLOBALS['TL_LANG']['tl_form']['cmailMessage']		= array('Message', 'Enter the message including placeholders. See help wizard icon for more information.');
+$GLOBALS['TL_LANG']['tl_form']['cmailTemplate']		= array('Mail template', 'Please chose the e-mail template.');
 
 
 /**

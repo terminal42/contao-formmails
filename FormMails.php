@@ -33,65 +33,34 @@ class FormMails extends Frontend
 
 	public function processFormData($arrPost, $arrForm, $arrFiles)
 	{
-		if ($arrForm['cmail'])
+		if ($arrForm['cmail'] && $arrForm['cmailTemplate'])
 		{
-			$blnSent = false;
+			$objField = $this->Database->prepare("SELECT name FROM tl_form_field WHERE id=?")
+									   ->limit(1)
+									   ->execute($arrForm['cmailRecipient']);
 
-			$arrData = $this->preparePostData($arrPost);
-
-			$objEmail = new Email();
-			$objEmail->subject = $arrForm['cmailSubject'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailSubject']), $arrData);
-			$objEmail->text = $arrForm['cmailMessage'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailMessage']), $arrData);
-
-			if ($arrForm['cmailSender'] == '')
+			// Return if field can not be found or the e-mail is invalid
+			if (!$objField->numRows || !$this->isValidEmailAddress($arrPost[$objField->name]))
 			{
-				$objEmail->from = $arrForm['cmailSender'] = $GLOBALS['TL_ADMIN_EMAIL'];
-
-				if ($GLOBALS['TL_ADMIN_NAME'] != '')
-				{
-					$objEmail->fromName = $GLOBALS['TL_ADMIN_NAME'];
-					$arrForm['cmailSender'] = $GLOBALS['TL_ADMIN_NAME'] . ' <' . $arrForm['cmailSender'] . '>';
-				}
-			}
-			else
-			{
-				$arrForm['cmailSender'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailSender']), $arrData);
-				list($strName, $strAddress) = $this->splitFriendlyName($arrForm['cmailSender']);
-
-				$objEmail->from = $strAddress;
-				$objEmail->fromName = $strName;
+				return;
 			}
 
-			if ($arrForm['cmailRecipient'] && (!isset($arrForm['cc']) || $arrForm['cc'] == '1'))
-			{
-				$objField = $this->Database->execute("SELECT * FROM tl_form_field WHERE id={$arrForm['cmailRecipient']}");
+			$objTemplate = $this->Database->prepare("SELECT * FROM tl_mail_templates WHERE id=?")
+										  ->limit(1)
+										  ->execute($arrForm['cmailTemplate']);
 
-				if ($objField->numRows && $this->isValidEmailAddress($arrData[$objField->name]))
-				{
-					$arrForm['cmailRecipient'] = $arrData[$objField->name];
-					$objEmail->sendTo($arrForm['cmailRecipient']);
-					$blnSent = true;
-				}
+			// Return if the template was not found
+			if (!$objTemplate->numRows)
+			{
+				return;
 			}
 
-			if ($arrForm['cmailBcc'] != '')
-			{
-				$arrForm['cmailBcc'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailBcc']), $arrData);
-				$arrBCC = trimsplit(',', $arrForm['cmailBcc']);
+			$objEmail = new EmailTemplate($objTemplate->id);
 
-				foreach( $arrBCC as $strRecipient )
-				{
-					$objEmail->sendTo($strRecipient);
-				}
-
-				$blnSent = true;
-			}
-
-			// Only add record if an email was sent
-			if ($blnSent)
+			if ($objEmail->send($arrPost[$objField->name], $this->preparePostData($arrPost)))
 			{
 				$this->Database->prepare("INSERT INTO tl_form_mails (pid,tstamp,cmailSender,cmailSubject,cmailRecipient,cmailBcc,cmailMessage,form_post,form_files) VALUES (?,?,?,?,?,?,?,?,?)")
-							   ->execute($arrForm['id'], time(), $arrForm['cmailSender'], $arrForm['cmailSubject'], $arrForm['cmailRecipient'], $arrForm['cmailBcc'], nl2br($arrForm['cmailMessage']), serialize($arrPost), serialize($arrFiles));
+							   ->execute($arrForm['id'], time(), $objTemplate->sender_address, $objEmail->subject, $arrForm['cmailRecipient'], ($objTemplate->recipient_bcc ? $objTemplate->recipient_bcc : ''), nl2br($objEmail->text), serialize($arrPost), serialize($arrFiles));
 			}
 		}
 	}

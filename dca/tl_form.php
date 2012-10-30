@@ -50,7 +50,7 @@ $GLOBALS['TL_DCA']['tl_form']['palettes']['default'] = str_replace('sendViaEmail
 /**
  * Subpalettes
  */
-$GLOBALS['TL_DCA']['tl_form']['subpalettes']['cmail'] = 'cmailRecipient,cmailBcc,cmailSender,cmailSubject,cmailMessage';
+$GLOBALS['TL_DCA']['tl_form']['subpalettes']['cmail'] = 'cmailRecipient,cmailTemplate';
 
 
 /**
@@ -72,33 +72,12 @@ $GLOBALS['TL_DCA']['tl_form']['fields']['cmailRecipient'] = array
 	'eval'					=> array('includeBlankOption'=>true, 'tl_class'=>'w50'),
 );
 
-$GLOBALS['TL_DCA']['tl_form']['fields']['cmailBcc'] = array
+$GLOBALS['TL_DCA']['tl_form']['fields']['cmailTemplate'] = array
 (
-	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailBcc'],
-	'inputType'				=> 'text',
-	'default'				=> $GLOBALS['TL_ADMIN_EMAIL'],
-	'eval'					=> array('maxlength'=>255, 'rgxp'=>'extnd', 'decodeEntities'=>true, 'tl_class'=>'w50'),
-);
-
-$GLOBALS['TL_DCA']['tl_form']['fields']['cmailSender'] = array
-(
-	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailSender'],
-	'inputType'				=> 'text',
-	'eval'					=> array('maxlength'=>255, 'decodeEntities'=>true, 'tl_class'=>'w50'),
-);
-
-$GLOBALS['TL_DCA']['tl_form']['fields']['cmailSubject'] = array
-(
-	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailSubject'],
-	'inputType'				=> 'text',
-	'eval'					=> array('mandatory'=>true, 'maxlength'=>255, 'decodeEntities'=>true, 'tl_class'=>'w50'),
-);
-
-$GLOBALS['TL_DCA']['tl_form']['fields']['cmailMessage'] = array
-(
-	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailMessage'],
-	'inputType'				=> 'textarea',
-	'eval'					=> array('mandatory'=>true, 'decodeEntities'=>true, 'tl_class'=>'clr'),
+	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailTemplate'],
+	'inputType'				=> 'select',
+	'foreignKey'			=> 'tl_mail_templates.name',
+	'eval'					=> array('mandatory'=>true, 'includeBlankOption'=>true, 'chosen'=>true, 'tl_class'=>'w50'),
 );
 
 
@@ -118,4 +97,3 @@ class tl_form_formmails extends Backend
 		return $arrFields;
 	}
 }
-
