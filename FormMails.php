@@ -49,7 +49,7 @@ class FormMails extends Frontend
 			$arrRecipients = trimsplit(',', $arrForm['cmailAdditionalRecipients']);
 
 			// Send an e-mail to recipient
-			if ($objField->numRows && $this->isValidEmailAddress($arrPost[$objField->name]))
+			if ($objField->numRows)
 			{
 				array_unshift($arrRecipients, $arrPost[$objField->name]);
 			}
