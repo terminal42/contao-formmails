@@ -45,33 +45,35 @@ class FormMails extends Frontend
 				return;
 			}
 
-			$blnSent = false;
-			$arrData = $this->preparePostData($arrPost);
-			$objEmail = new EmailTemplate($objTemplate->id);
+			$arrSent = array();
+			$arrRecipients = trimsplit(',', $arrForm['cmailAdditionalRecipients']);
 
 			// Send an e-mail to recipient
 			if ($objField->numRows && $this->isValidEmailAddress($arrPost[$objField->name]))
 			{
-				$blnSent = $objEmail->send($arrPost[$objField->name], $arrData);
+				array_unshift($arrRecipients, $arrPost[$objField->name]);
 			}
-			// Send blind carbon copies, if any
-			elseif ($objTemplate->recipient_bcc != '')
-			{
-				$recipients = trimsplit(',', $objTemplate->recipient_bcc);
 
-				foreach ($recipients as $email)
+			// Send e-mails
+			if (!empty($arrRecipients))
+			{
+				$objEmail = new EmailTemplate($objTemplate->id);
+				$arrData = $this->preparePostData($arrPost);
+
+				foreach ($arrRecipients as $strEmail)
 				{
-					if ($this->isValidEmailAddress($email))
+					if ($this->isValidEmailAddress($strEmail) && ($objEmail->send($strEmail, $arrData) || true))
 					{
-						$blnSent = $objEmail->send($email, $arrData);
+						$arrSent[] = $strEmail;
 					}
 				}
 			}
 
-			if ($blnSent)
+			// Create a log entry
+			if (!empty($arrSent))
 			{
 				$this->Database->prepare("INSERT INTO tl_form_mails (pid,tstamp,cmailSender,cmailSubject,cmailRecipient,cmailBcc,cmailMessage,form_post,form_files) VALUES (?,?,?,?,?,?,?,?,?)")
-							   ->execute($arrForm['id'], time(), $objTemplate->sender_address, $objEmail->subject, $arrForm['cmailRecipient'], ($objTemplate->recipient_bcc ? $objTemplate->recipient_bcc : ''), nl2br($objEmail->text), serialize($arrPost), serialize($arrFiles));
+							   ->execute($arrForm['id'], time(), $objTemplate->sender_address, $objEmail->subject, $arrForm['cmailRecipient'], implode(', ', $arrSent), nl2br($objEmail->text), serialize($arrPost), serialize($arrFiles));
 			}
 		}
 	}

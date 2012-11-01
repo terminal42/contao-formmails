@@ -51,7 +51,7 @@ $GLOBALS['TL_DCA']['tl_form']['palettes']['default'] = str_replace('sendViaEmail
 /**
  * Subpalettes
  */
-$GLOBALS['TL_DCA']['tl_form']['subpalettes']['cmail'] = 'cmailRecipient,cmailTemplate';
+$GLOBALS['TL_DCA']['tl_form']['subpalettes']['cmail'] = 'cmailRecipient,cmailTemplate,cmailAdditionalRecipients';
 
 
 /**
@@ -79,6 +79,13 @@ $GLOBALS['TL_DCA']['tl_form']['fields']['cmailTemplate'] = array
 	'inputType'				=> 'select',
 	'foreignKey'			=> 'tl_mail_templates.name',
 	'eval'					=> array('mandatory'=>true, 'includeBlankOption'=>true, 'chosen'=>true, 'tl_class'=>'w50'),
+);
+
+$GLOBALS['TL_DCA']['tl_form']['fields']['cmailAdditionalRecipients'] = array
+(
+	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailAdditionalRecipients'],
+	'inputType'				=> 'textarea',
+	'eval'					=> array('style'=>'height:60px;', 'tl_class'=>'clr'),
 );
 
 
