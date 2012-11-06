@@ -37,14 +37,6 @@ class FormMails extends Frontend
 		if ($arrForm['cmail'] && $arrForm['cmailTemplate'])
 		{
 			$objField = $this->Database->prepare("SELECT name FROM tl_form_field WHERE id=?")->limit(1)->execute($arrForm['cmailRecipient']);
-			$objTemplate = $this->Database->prepare("SELECT * FROM tl_mail_templates WHERE id=?")->limit(1)->execute($arrForm['cmailTemplate']);
-
-			// Return if the template was not found
-			if (!$objTemplate->numRows)
-			{
-				return;
-			}
-
 			$arrSent = array();
 			$arrRecipients = trimsplit(',', $arrForm['cmailAdditionalRecipients']);
 
@@ -57,15 +49,22 @@ class FormMails extends Frontend
 			// Send e-mails
 			if (!empty($arrRecipients))
 			{
-				$objEmail = new EmailTemplate($objTemplate->id);
-				$arrData = $this->preparePostData($arrPost);
-
-				foreach ($arrRecipients as $strEmail)
+				try
 				{
-					if ($this->isValidEmailAddress($strEmail) && ($objEmail->send($strEmail, $arrData) || true))
+					$objEmail = new EmailTemplate($arrForm['cmailTemplate']);
+					$arrData = $this->preparePostData($arrPost);
+	
+					foreach ($arrRecipients as $strEmail)
 					{
-						$arrSent[] = $strEmail;
+						if ($this->isValidEmailAddress($strEmail) && ($objEmail->send($strEmail, $arrData) || true))
+						{
+							$arrSent[] = $strEmail;
+						}
 					}
+				}
+				catch (Exception $e)
+				{
+					$this->log('Unable to send e-mail: ' . $e->getMessage(), 'FormMails processFormData()', TL_ERROR);
 				}
 			}
 
@@ -73,7 +72,7 @@ class FormMails extends Frontend
 			if (!empty($arrSent))
 			{
 				$this->Database->prepare("INSERT INTO tl_form_mails (pid,tstamp,cmailSender,cmailSubject,cmailRecipient,cmailBcc,cmailMessage,form_post,form_files) VALUES (?,?,?,?,?,?,?,?,?)")
-							   ->execute($arrForm['id'], time(), $objTemplate->sender_address, $objEmail->subject, $arrForm['cmailRecipient'], implode(', ', $arrSent), nl2br($objEmail->text), serialize($arrPost), serialize($arrFiles));
+							   ->execute($arrForm['id'], time(), $objEmail->from, (string) $objEmail->subject, $arrForm['cmailRecipient'], implode(', ', $arrSent), nl2br($objEmail->text), serialize($arrPost), serialize($arrFiles));
 			}
 		}
 	}
