@@ -34,45 +34,51 @@ class FormMails extends Frontend
 
 	public function processFormData($arrPost, $arrForm, $arrFiles)
 	{
-		if ($arrForm['cmail'] && $arrForm['cmailTemplate'])
+		if ($arrForm['cmail'] && $arrForm['cmail_templates'] != '')
 		{
-			$objField = $this->Database->prepare("SELECT name FROM tl_form_field WHERE id=?")->limit(1)->execute($arrForm['cmailRecipient']);
-			$arrSent = array();
-			$arrRecipients = trimsplit(',', $arrForm['cmailAdditionalRecipients']);
+			$arrTemplates = deserialize($arrForm['cmail_templates'], true);
 
-			// Send an e-mail to recipient
-			if ($objField->numRows)
+			// Send the e-mails
+			foreach ($arrTemplates as $arrTemplate)
 			{
-				array_unshift($arrRecipients, $arrPost[$objField->name]);
-			}
+				$arrSent = array();
+				$arrRecipients = trimsplit(',', $arrTemplate['additional_recipients']);
+				$objField = $this->Database->prepare("SELECT name FROM tl_form_field WHERE id=?")->limit(1)->execute($arrTemplate['recipient']);
 
-			// Send e-mails
-			if (!empty($arrRecipients))
-			{
-				try
+				// Send an e-mail to recipient
+				if ($objField->numRows)
 				{
-					$objEmail = new EmailTemplate($arrForm['cmailTemplate']);
-					$arrData = $this->preparePostData($arrPost);
-	
-					foreach ($arrRecipients as $strEmail)
+					array_unshift($arrRecipients, $arrPost[$objField->name]);
+				}
+
+				// Send e-mails
+				if (!empty($arrRecipients))
+				{
+					try
 					{
-						if ($this->isValidEmailAddress($strEmail) && ($objEmail->send($strEmail, $arrData) || true))
+						$objEmail = new EmailTemplate($arrTemplate['template']);
+						$arrData = $this->preparePostData($arrPost);
+
+						foreach ($arrRecipients as $strEmail)
 						{
-							$arrSent[] = $strEmail;
+							if ($this->isValidEmailAddress($strEmail) && $objEmail->send($strEmail, $arrData))
+							{
+								$arrSent[] = $strEmail;
+							}
 						}
 					}
+					catch (Exception $e)
+					{
+						$this->log('Unable to send e-mail: ' . $e->getMessage(), 'FormMails processFormData()', TL_ERROR);
+					}
 				}
-				catch (Exception $e)
-				{
-					$this->log('Unable to send e-mail: ' . $e->getMessage(), 'FormMails processFormData()', TL_ERROR);
-				}
-			}
 
-			// Create a log entry
-			if (!empty($arrSent))
-			{
-				$this->Database->prepare("INSERT INTO tl_form_mails (pid,tstamp,cmailSender,cmailSubject,cmailRecipient,cmailBcc,cmailMessage,form_post,form_files) VALUES (?,?,?,?,?,?,?,?,?)")
-							   ->execute($arrForm['id'], time(), $objEmail->from, (string) $objEmail->subject, $arrForm['cmailRecipient'], implode(', ', $arrSent), nl2br($objEmail->text), serialize($arrPost), serialize($arrFiles));
+				// Create a log entry
+				if (!empty($arrSent))
+				{
+					$this->Database->prepare("INSERT INTO tl_form_mails (pid,tstamp,cmailSender,cmailSubject,cmailRecipient,cmailBcc,cmailMessage,form_post,form_files) VALUES (?,?,?,?,?,?,?,?,?)")
+								   ->execute($arrForm['id'], time(), $objEmail->from, (string) $objEmail->subject, $arrTemplate['recipient'], implode(', ', $arrSent), nl2br($objEmail->text), serialize($arrPost), serialize($arrFiles));
+				}
 			}
 		}
 	}

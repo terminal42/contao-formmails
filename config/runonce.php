@@ -61,7 +61,6 @@ class FormmailRunonce extends Controller
 				(
 					'tstamp' => $time,
 					'name' => $objForms->name,
-					'recipient_bcc' => $objForms->cmailBcc,
 					'priority' => 3,
 					'template' => 'mail_default'
 				);

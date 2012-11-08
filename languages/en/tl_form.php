@@ -32,10 +32,11 @@
 /**
  * Fields
  */
-$GLOBALS['TL_LANG']['tl_form']['cmail']						= array('Send mail to customer', 'Check here to send an email to the customer.');
-$GLOBALS['TL_LANG']['tl_form']['cmailRecipient']			= array('Recipient', 'Please select the field containing the recipient address.');
-$GLOBALS['TL_LANG']['tl_form']['cmailTemplate']				= array('Mail template', 'Please chose the e-mail template.');
-$GLOBALS['TL_LANG']['tl_form']['cmailAdditionalRecipients']	= array('Additional recipients', 'Here you can enter a comma separated list with additional recipients that will receive the e-mail.');
+$GLOBALS['TL_LANG']['tl_form']['cmail']							= array('Send mail to customer', 'Check here to send an email to the customer.');
+$GLOBALS['TL_LANG']['tl_form']['cmail_templates']				= array('Templates', 'Here you can add multiple e-mail templates.');
+$GLOBALS['TL_LANG']['tl_form']['cmail_recipient']				= array('Recipient', 'Please select the field containing the recipient address.');
+$GLOBALS['TL_LANG']['tl_form']['cmail_template']				= array('Mail template', 'Please chose the e-mail template.');
+$GLOBALS['TL_LANG']['tl_form']['cmail_additionalRecipients']	= array('Additional recipients', 'Here you can enter a comma separated list with additional recipients that will receive the e-mail.');
 
 
 /**

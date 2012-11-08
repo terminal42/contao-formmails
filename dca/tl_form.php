@@ -51,7 +51,7 @@ $GLOBALS['TL_DCA']['tl_form']['palettes']['default'] = str_replace('sendViaEmail
 /**
  * Subpalettes
  */
-$GLOBALS['TL_DCA']['tl_form']['subpalettes']['cmail'] = 'cmailRecipient,cmailTemplate,cmailAdditionalRecipients';
+$GLOBALS['TL_DCA']['tl_form']['subpalettes']['cmail'] = 'cmail_templates';
 
 
 /**
@@ -64,38 +64,44 @@ $GLOBALS['TL_DCA']['tl_form']['fields']['cmail'] = array
 	'eval'					=> array('submitOnChange'=>true, 'tl_class'=>'clr'),
 );
 
-$GLOBALS['TL_DCA']['tl_form']['fields']['cmailRecipient'] = array
+$GLOBALS['TL_DCA']['tl_form']['fields']['cmail_templates'] = array
 (
-	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailRecipient'],
-	'inputType'				=> 'select',
-	'default'				=> 'email',
-	'options_callback'		=> array('tl_form_formmails', 'getFields'),
-	'eval'					=> array('includeBlankOption'=>true, 'tl_class'=>'w50'),
-);
-
-$GLOBALS['TL_DCA']['tl_form']['fields']['cmailTemplate'] = array
-(
-	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailTemplate'],
-	'inputType'				=> 'select',
-	'foreignKey'			=> 'tl_mail_templates.name',
-	'eval'					=> array('mandatory'=>true, 'includeBlankOption'=>true, 'chosen'=>true, 'tl_class'=>'w50'),
-);
-
-$GLOBALS['TL_DCA']['tl_form']['fields']['cmailAdditionalRecipients'] = array
-(
-	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailAdditionalRecipients'],
-	'inputType'				=> 'textarea',
-	'eval'					=> array('style'=>'height:60px;', 'tl_class'=>'clr'),
+	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmail_templates'],
+	'inputType'				=> 'multiColumnWizard',
+	'eval'                  => array('mandatory'=>true, 'columnFields'=>array
+	(
+		'recipient' => array
+		(
+			'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmail_recipient'],
+			'inputType'				=> 'select',
+			'options_callback'      => array('tl_form_formmails', 'getFields'),
+			'eval'					=> array('includeBlankOption'=>true, 'style'=>'width:130px;'),
+		),
+		'template' => array
+		(
+			'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmail_template'],
+			'inputType'				=> 'select',
+			'foreignKey'            => 'tl_mail_templates.name',
+			'eval'					=> array('mandatory'=>true, 'style'=>'width:130px;'),
+		),
+		'additional_recipients' => array
+		(
+			'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmail_additionalRecipients'],
+			'inputType'				=> 'textarea',
+			'eval'					=> array('style'=>'width:320px;height:30px;')
+		)
+	))
 );
 
 
 class tl_form_formmails extends Backend
 {
 	
-	public function getFields($dc)
+	public function getFields()
 	{
 		$arrFields = array();
-		$objFields = $this->Database->execute("SELECT * FROM tl_form_field WHERE pid={$dc->id} AND name!=''");
+		$objFields = $this->Database->prepare("SELECT * FROM tl_form_field WHERE pid=? AND name!=''")
+									->execute($this->Input->get('id'));
 		
 		while( $objFields->next() )
 		{
