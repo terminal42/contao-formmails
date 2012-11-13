@@ -49,8 +49,13 @@ class FormmailRunonce extends Controller
 	 */
 	public function run()
 	{
-		if (in_array('mailtemplates', $this->Config->getActiveModules()))
+		if (in_array('mailtemplates', $this->Config->getActiveModules()) && $this->Database->fieldExists('cmailSender', 'tl_form'))
 		{
+			if (!$this->Database->fieldExists('cmail_templates', 'tl_form'))
+			{
+				$this->Database->query("ALTER TABLE tl_form ADD cmail_templates blob NULL");
+			}
+
 			$time = time();
 			$objForms = $this->Database->execute("SELECT * FROM tl_form WHERE cmail=1");
 
@@ -79,6 +84,15 @@ class FormmailRunonce extends Controller
 					);
 
 					$this->Database->prepare("INSERT INTO tl_mail_template_languages %s")->set($arrSet)->execute();
+
+					$arrTemplate = array(array
+					(
+						'recipient' => $objForms->cmailRecipient,
+						'template' => $insertId,
+						'additional_recipients' => $objForms->cmailBcc
+					));
+
+					$this->Database->prepare("UPDATE tl_form SET cmail_templates=? WHERE id=?")->execute(serialize($arrTemplate), $objForms->id);
 				}
 			}
 		}
