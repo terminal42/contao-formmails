@@ -23,6 +23,7 @@
  * PHP version 5
  * @copyright  Andreas Schempp 2010
  * @author     Andreas Schempp <andreas@schempp.ch>
+ * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com>
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  * @version    $Id$
  */
@@ -50,7 +51,7 @@ $GLOBALS['TL_DCA']['tl_form']['palettes']['default'] = str_replace('sendViaEmail
 /**
  * Subpalettes
  */
-$GLOBALS['TL_DCA']['tl_form']['subpalettes']['cmail'] = 'cmailRecipient,cmailBcc,cmailSender,cmailSubject,cmailMessage';
+$GLOBALS['TL_DCA']['tl_form']['subpalettes']['cmail'] = 'cmail_templates';
 
 
 /**
@@ -63,52 +64,44 @@ $GLOBALS['TL_DCA']['tl_form']['fields']['cmail'] = array
 	'eval'					=> array('submitOnChange'=>true, 'tl_class'=>'clr'),
 );
 
-$GLOBALS['TL_DCA']['tl_form']['fields']['cmailRecipient'] = array
+$GLOBALS['TL_DCA']['tl_form']['fields']['cmail_templates'] = array
 (
-	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailRecipient'],
-	'inputType'				=> 'select',
-	'default'				=> 'email',
-	'options_callback'		=> array('tl_form_formmails', 'getFields'),
-	'eval'					=> array('includeBlankOption'=>true, 'tl_class'=>'w50'),
-);
-
-$GLOBALS['TL_DCA']['tl_form']['fields']['cmailBcc'] = array
-(
-	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailBcc'],
-	'inputType'				=> 'text',
-	'default'				=> $GLOBALS['TL_ADMIN_EMAIL'],
-	'eval'					=> array('maxlength'=>255, 'rgxp'=>'extnd', 'decodeEntities'=>true, 'tl_class'=>'w50'),
-);
-
-$GLOBALS['TL_DCA']['tl_form']['fields']['cmailSender'] = array
-(
-	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailSender'],
-	'inputType'				=> 'text',
-	'eval'					=> array('maxlength'=>255, 'decodeEntities'=>true, 'tl_class'=>'w50'),
-);
-
-$GLOBALS['TL_DCA']['tl_form']['fields']['cmailSubject'] = array
-(
-	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailSubject'],
-	'inputType'				=> 'text',
-	'eval'					=> array('mandatory'=>true, 'maxlength'=>255, 'decodeEntities'=>true, 'tl_class'=>'w50'),
-);
-
-$GLOBALS['TL_DCA']['tl_form']['fields']['cmailMessage'] = array
-(
-	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmailMessage'],
-	'inputType'				=> 'textarea',
-	'eval'					=> array('mandatory'=>true, 'decodeEntities'=>true, 'tl_class'=>'clr'),
+	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmail_templates'],
+	'inputType'				=> 'multiColumnWizard',
+	'eval'                  => array('mandatory'=>true, 'columnFields'=>array
+	(
+		'recipient' => array
+		(
+			'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmail_recipient'],
+			'inputType'				=> 'select',
+			'options_callback'      => array('tl_form_formmails', 'getFields'),
+			'eval'					=> array('includeBlankOption'=>true, 'style'=>'width:130px;'),
+		),
+		'template' => array
+		(
+			'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmail_template'],
+			'inputType'				=> 'select',
+			'foreignKey'            => 'tl_mail_templates.name',
+			'eval'					=> array('mandatory'=>true, 'style'=>'width:130px;'),
+		),
+		'additional_recipients' => array
+		(
+			'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmail_additionalRecipients'],
+			'inputType'				=> 'textarea',
+			'eval'					=> array('style'=>'width:320px;height:30px;')
+		)
+	))
 );
 
 
 class tl_form_formmails extends Backend
 {
 	
-	public function getFields($dc)
+	public function getFields()
 	{
 		$arrFields = array();
-		$objFields = $this->Database->execute("SELECT * FROM tl_form_field WHERE pid={$dc->id} AND name!=''");
+		$objFields = $this->Database->prepare("SELECT * FROM tl_form_field WHERE pid=? AND name!=''")
+									->execute($this->Input->get('id'));
 		
 		while( $objFields->next() )
 		{
@@ -118,4 +111,3 @@ class tl_form_formmails extends Backend
 		return $arrFields;
 	}
 }
-

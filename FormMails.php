@@ -23,6 +23,7 @@
  * PHP version 5
  * @copyright  Andreas Schempp 2010
  * @author     Andreas Schempp <andreas@schempp.ch>
+ * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com>
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  * @version    $Id$
  */
@@ -33,65 +34,51 @@ class FormMails extends Frontend
 
 	public function processFormData($arrPost, $arrForm, $arrFiles)
 	{
-		if ($arrForm['cmail'])
+		if ($arrForm['cmail'] && $arrForm['cmail_templates'] != '')
 		{
-			$blnSent = false;
+			$arrTemplates = deserialize($arrForm['cmail_templates'], true);
 
-			$arrData = $this->preparePostData($arrPost);
-
-			$objEmail = new Email();
-			$objEmail->subject = $arrForm['cmailSubject'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailSubject']), $arrData);
-			$objEmail->text = $arrForm['cmailMessage'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailMessage']), $arrData);
-
-			if ($arrForm['cmailSender'] == '')
+			// Send the e-mails
+			foreach ($arrTemplates as $arrTemplate)
 			{
-				$objEmail->from = $arrForm['cmailSender'] = $GLOBALS['TL_ADMIN_EMAIL'];
+				$arrSent = array();
+				$arrRecipients = trimsplit(',', $arrTemplate['additional_recipients']);
+				$objField = $this->Database->prepare("SELECT name FROM tl_form_field WHERE id=?")->limit(1)->execute($arrTemplate['recipient']);
 
-				if ($GLOBALS['TL_ADMIN_NAME'] != '')
+				// Send an e-mail to recipient
+				if ($objField->numRows)
 				{
-					$objEmail->fromName = $GLOBALS['TL_ADMIN_NAME'];
-					$arrForm['cmailSender'] = $GLOBALS['TL_ADMIN_NAME'] . ' <' . $arrForm['cmailSender'] . '>';
-				}
-			}
-			else
-			{
-				$arrForm['cmailSender'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailSender']), $arrData);
-				list($strName, $strAddress) = $this->splitFriendlyName($arrForm['cmailSender']);
-
-				$objEmail->from = $strAddress;
-				$objEmail->fromName = $strName;
-			}
-
-			if ($arrForm['cmailRecipient'] && (!isset($arrForm['cc']) || $arrForm['cc'] == '1'))
-			{
-				$objField = $this->Database->execute("SELECT * FROM tl_form_field WHERE id={$arrForm['cmailRecipient']}");
-
-				if ($objField->numRows && $this->isValidEmailAddress($arrData[$objField->name]))
-				{
-					$arrForm['cmailRecipient'] = $arrData[$objField->name];
-					$objEmail->sendTo($arrForm['cmailRecipient']);
-					$blnSent = true;
-				}
-			}
-
-			if ($arrForm['cmailBcc'] != '')
-			{
-				$arrForm['cmailBcc'] = $this->parseSimpleTokens($this->replaceInsertTags($arrForm['cmailBcc']), $arrData);
-				$arrBCC = trimsplit(',', $arrForm['cmailBcc']);
-
-				foreach( $arrBCC as $strRecipient )
-				{
-					$objEmail->sendTo($strRecipient);
+					array_unshift($arrRecipients, $arrPost[$objField->name]);
 				}
 
-				$blnSent = true;
-			}
+				// Send e-mails
+				if (!empty($arrRecipients))
+				{
+					try
+					{
+						$objEmail = new EmailTemplate($arrTemplate['template']);
+						$arrData = $this->preparePostData($arrPost);
 
-			// Only add record if an email was sent
-			if ($blnSent)
-			{
-				$this->Database->prepare("INSERT INTO tl_form_mails (pid,tstamp,cmailSender,cmailSubject,cmailRecipient,cmailBcc,cmailMessage,form_post,form_files) VALUES (?,?,?,?,?,?,?,?,?)")
-							   ->execute($arrForm['id'], time(), $arrForm['cmailSender'], $arrForm['cmailSubject'], $arrForm['cmailRecipient'], $arrForm['cmailBcc'], nl2br($arrForm['cmailMessage']), serialize($arrPost), serialize($arrFiles));
+						foreach ($arrRecipients as $strEmail)
+						{
+							if ($this->isValidEmailAddress($strEmail) && $objEmail->send($strEmail, $arrData))
+							{
+								$arrSent[] = $strEmail;
+							}
+						}
+					}
+					catch (Exception $e)
+					{
+						$this->log('Unable to send e-mail: ' . $e->getMessage(), 'FormMails processFormData()', TL_ERROR);
+					}
+				}
+
+				// Create a log entry
+				if (!empty($arrSent))
+				{
+					$this->Database->prepare("INSERT INTO tl_form_mails (pid,tstamp,cmailSender,cmailSubject,cmailRecipient,cmailBcc,cmailMessage,form_post,form_files) VALUES (?,?,?,?,?,?,?,?,?)")
+								   ->execute($arrForm['id'], time(), $objEmail->from, (string) $objEmail->subject, $arrTemplate['recipient'], implode(', ', $arrSent), nl2br($objEmail->text), serialize($arrPost), serialize($arrFiles));
+				}
 			}
 		}
 	}

@@ -23,6 +23,7 @@
  * PHP version 5
  * @copyright  Andreas Schempp 2010
  * @author     Andreas Schempp <andreas@schempp.ch>
+ * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com>
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  * @version    $Id$
  */
@@ -31,12 +32,11 @@
 /**
  * Fields
  */
-$GLOBALS['TL_LANG']['tl_form']['cmail']				= array('Send mail to customer', 'Check here to send an email to the customer.');
-$GLOBALS['TL_LANG']['tl_form']['cmailRecipient']	= array('Recipient', 'Please select the field containing the recipient address.');
-$GLOBALS['TL_LANG']['tl_form']['cmailBcc']			= array('Blind Copy', 'Send a blind copy of this mail to the given email addresses (comma separated).');
-$GLOBALS['TL_LANG']['tl_form']['cmailSender']		= array('Sender', 'Please enter a sender address. If you leave this blank, the system admin address will be used.');
-$GLOBALS['TL_LANG']['tl_form']['cmailSubject']		= array('Subject', 'Please enter a subject.');
-$GLOBALS['TL_LANG']['tl_form']['cmailMessage']		= array('Message', 'Enter the message including placeholders. See help wizard icon for more information.');
+$GLOBALS['TL_LANG']['tl_form']['cmail']							= array('Send mail to customer', 'Check here to send an email to the customer.');
+$GLOBALS['TL_LANG']['tl_form']['cmail_templates']				= array('Templates', 'Here you can add multiple e-mail templates.');
+$GLOBALS['TL_LANG']['tl_form']['cmail_recipient']				= array('Recipient', 'Please select the field containing the recipient address.');
+$GLOBALS['TL_LANG']['tl_form']['cmail_template']				= array('Mail template', 'Please chose the e-mail template.');
+$GLOBALS['TL_LANG']['tl_form']['cmail_additionalRecipients']	= array('Additional recipients', 'Here you can enter a comma separated list with additional recipients that will receive the e-mail.');
 
 
 /**

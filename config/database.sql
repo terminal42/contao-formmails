@@ -13,11 +13,7 @@
 
 CREATE TABLE `tl_form` (
   `cmail` char(1) NOT NULL default '',
-  `cmailSender` varchar(255) NOT NULL default '',
-  `cmailRecipient` int(10) unsigned NOT NULL default '0',
-  `cmailSubject` varchar(255) NOT NULL default '',
-  `cmailBcc` varchar(255) NOT NULL default '',
-  `cmailMessage` text NULL,
+  `cmail_templates` blob NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
