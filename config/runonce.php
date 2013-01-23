@@ -49,22 +49,19 @@ class FormmailRunonce extends Controller
 	 */
 	public function run()
 	{
-		if (in_array('mailtemplates', $this->Config->getActiveModules()) && $this->Database->fieldExists('cmailSender', 'tl_form'))
+		if (in_array('mailtemplates', $this->Config->getActiveModules()) && !$this->Database->fieldExists('cmail_templates', 'tl_form') && $this->Database->fieldExists('cmailSender', 'tl_form'))
 		{
-			if (!$this->Database->fieldExists('cmail_templates', 'tl_form'))
-			{
-				$this->Database->query("ALTER TABLE tl_form ADD cmail_templates blob NULL");
-			}
+			$this->Database->query("ALTER TABLE tl_form ADD cmail_templates blob NULL");
 
 			$time = time();
-			$objForms = $this->Database->execute("SELECT * FROM tl_form WHERE cmail=1");
+			$objForms = $this->Database->execute("SELECT * FROM tl_form WHERE cmail='1'");
 
 			while ($objForms->next())
 			{
 				$arrSet = array
 				(
 					'tstamp' => $time,
-					'name' => $objForms->name,
+					'name' => $objForms->title,
 					'priority' => 3,
 					'template' => 'mail_default'
 				);
