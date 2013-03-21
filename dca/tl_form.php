@@ -35,7 +35,7 @@ $GLOBALS['TL_DCA']['tl_form']['list']['operations']['mails'] = array
 (
 	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['mails'],
 	'href'					=> 'table=tl_form_mails',
-	'icon'					=> 'system/modules/formmails/html/mails.png',
+	'icon'					=> 'system/modules/formmails/assets/mails.png',
 //	'button_callback'		=> array(),
 );
 

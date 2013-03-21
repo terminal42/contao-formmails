@@ -30,7 +30,7 @@
 /**
  * Load CSV file
  */
-$GLOBALS['TL_CSS'][] = 'system/modules/formmails/html/style.css';
+$GLOBALS['TL_CSS'][] = 'system/modules/formmails/assets/style.css';
 
 
 /**
