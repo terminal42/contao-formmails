@@ -41,7 +41,7 @@ class FormMails extends Frontend
 			foreach ($arrTemplates as $arrTemplate)
 			{
 				$arrSent = array();
-				$arrRecipients = trimsplit(',', $arrTemplate['additional_recipients']);
+				$arrRecipients = trimsplit(',', $this->parseSimpleTokens($this->replaceInsertTags($arrTemplate['additional_recipients']), $arrPost));
 				$objField = $this->Database->prepare("SELECT name FROM tl_form_field WHERE id=?")->limit(1)->execute($arrTemplate['recipient']);
 
 				// Send an e-mail to recipient
