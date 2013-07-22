@@ -60,7 +60,7 @@ $GLOBALS['TL_DCA']['tl_form']['fields']['cmail'] = array
 (
 	'label'					=> &$GLOBALS['TL_LANG']['tl_form']['cmail'],
 	'inputType'				=> 'checkbox',
-	'eval'					=> array('submitOnChange'=>true, 'tl_class'=>'clr'),
+	'eval'					=> array('submitOnChange'=>true, 'tl_class'=>'w50 clr'),
 );
 
 $GLOBALS['TL_DCA']['tl_form']['fields']['cmail_templates'] = array
