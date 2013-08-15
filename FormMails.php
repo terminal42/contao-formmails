@@ -75,8 +75,14 @@ class FormMails extends Frontend
 				// Create a log entry
 				if (!empty($arrSent))
 				{
+				    $strSender = $objEmail->from;
+
+				    if ($objEmail->fromName != '') {
+    				    $strSender = $objEmail->fromName . ' [' . $strSender . ']';
+				    }
+
 					$this->Database->prepare("INSERT INTO tl_form_mails (pid,tstamp,cmailSender,cmailSubject,cmailRecipient,cmailBcc,cmailMessage,form_post,form_files) VALUES (?,?,?,?,?,?,?,?,?)")
-								   ->execute($arrForm['id'], time(), $objEmail->from, (string) $objEmail->subject, $arrTemplate['recipient'], implode(', ', $arrSent), nl2br($objEmail->text), serialize($arrPost), serialize($arrFiles));
+								   ->execute($arrForm['id'], time(), $strSender, (string) $objEmail->subject, $arrTemplate['recipient'], implode(', ', $arrSent), nl2br($objEmail->text), serialize($arrPost), serialize($arrFiles));
 				}
 			}
 		}
