@@ -30,7 +30,7 @@
 /**
  * Fields
  */
-$GLOBALS['TL_LANG']['tl_form_mails']['tstamp']			= array('Received');
+$GLOBALS['TL_LANG']['tl_form_mails']['tstamp']			= array('Sent');
 $GLOBALS['TL_LANG']['tl_form_mails']['cmailRecipient']	= array('Recipient');
 $GLOBALS['TL_LANG']['tl_form_mails']['cmailBcc']		= array('Blind Copy');
 $GLOBALS['TL_LANG']['tl_form_mails']['cmailSender']		= array('Sender');
