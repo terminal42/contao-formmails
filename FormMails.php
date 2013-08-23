@@ -56,7 +56,7 @@ class FormMails extends Frontend
 					try
 					{
 						$objEmail = new EmailTemplate($arrTemplate['template']);
-						$arrData = $this->preparePostData($arrPost);
+						$arrData = $this->preparePostData($arrPost, $arrFiles);
 
 						foreach ($arrRecipients as $strEmail)
 						{
@@ -89,13 +89,28 @@ class FormMails extends Frontend
 	}
 
 
-	private function preparePostData($arrData, $blnImplode=false)
+    private function preparePostData($arrData, $arrFiles)
+    {
+        foreach ($arrFiles as $strFieldName => $arrFile) {
+
+            // We only include files if they are uploaded to the Contao folder
+            if (strpos($arrFile['tmp_name'], TL_ROOT) === 0) {
+                $arrData[$strFieldName] = str_replace(TL_ROOT . '/', '', $arrFile['tmp_name']);
+            }
+        }
+
+        $arrData = $this->recursiveImplode($arrData);
+
+        return $arrData;
+    }
+
+	private function recursiveImplode($arrData, $blnImplode=false)
 	{
-		foreach( $arrData as $k => $v )
+		foreach ($arrData as $k => $v)
 		{
 			if (is_array($v))
 			{
-				$arrData[$k] = $this->preparePostData($v, true);
+				$arrData[$k] = $this->recursiveImplode($v, true);
 			}
 		}
 
