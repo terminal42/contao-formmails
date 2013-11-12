@@ -91,11 +91,13 @@ class FormMails extends Frontend
 
     private function preparePostData($arrData, $arrFiles)
     {
-        foreach ($arrFiles as $strFieldName => $arrFile) {
+        if (!empty($arrFiles) && is_array($arrFiles)) {
+            foreach ($arrFiles as $strFieldName => $arrFile) {
 
-            // We only include files if they are uploaded to the Contao folder
-            if (strpos($arrFile['tmp_name'], TL_ROOT) === 0) {
-                $arrData[$strFieldName] = str_replace(TL_ROOT . '/', '', $arrFile['tmp_name']);
+                // We only include files if they are uploaded to the Contao folder
+                if (strpos($arrFile['tmp_name'], TL_ROOT) === 0) {
+                    $arrData[$strFieldName] = str_replace(TL_ROOT . '/', '', $arrFile['tmp_name']);
+                }
             }
         }
 
